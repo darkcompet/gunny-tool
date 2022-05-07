@@ -11,6 +11,7 @@ import android.view.View
 import android.widget.SeekBar
 import compet.bundle.R
 import compet.bundle.common.AppPrefs
+import tool.compet.core.DkConfig
 import tool.compet.core.DkMaths
 import kotlin.math.PI
 import kotlin.math.cos
@@ -55,6 +56,7 @@ class MinimapView @JvmOverloads constructor(
 	private var enemyY: Float = 0f
 
 	private val paint: Paint
+	private val textPaint: Paint
 
 	private val bulletPaint: Paint
 
@@ -66,6 +68,11 @@ class MinimapView @JvmOverloads constructor(
 			this.color = Color.GREEN
 			this.style = Paint.Style.STROKE
 			this.strokeWidth = 2f
+		}
+
+		this.textPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+			this.color = Color.GREEN
+			this.textSize = 8 * DkConfig.scaledDensity()
 		}
 
 		this.rulerPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
@@ -129,18 +136,21 @@ class MinimapView @JvmOverloads constructor(
 		// [Enemy]
 //		canvas.drawCircle(this.enemyX, this.enemyY, 4f, this.enemyPaint)
 
-//		// [Matrix]
-//		// Draw lines at Ox axis
-//		val rulerUnitSize = this.rulerBounds.width() / 10
-//		val rightCount = ((width - this.playerX) / rulerUnitSize).toInt()
-//		val leftCount = (this.playerX / rulerUnitSize).toInt()
-//		for (i in -rightCount..leftCount) {
-//			canvas.drawLine(
-//				this.playerX - i * rulerUnitSize, 0f,
-//				this.playerX - i * rulerUnitSize, height,
-//				this.rulerPaint
-//			)
-//		}
+		// [Matrix]
+		// Draw lines at Ox axis
+		val rulerUnitSize = this.rulerBounds.width() / 10
+		val rightCount = ((width - this.playerX) / rulerUnitSize).toInt()
+		val leftCount = (this.playerX / rulerUnitSize).toInt()
+		for (i in -rightCount..leftCount) {
+			if (i % 2 == 0) {
+				canvas.drawLine(
+					this.playerX - i * rulerUnitSize, 0f,
+					this.playerX - i * rulerUnitSize, height,
+					this.rulerPaint
+				)
+				canvas.drawText("$i", this.playerX - i * rulerUnitSize, height, this.textPaint)
+			}
+		}
 //		// Draw lines at Oy axis
 //		val bottomCount = ((height - this.playerY) / rulerUnitSize).toInt()
 //		val topCount = (this.playerY / rulerUnitSize).toInt()
@@ -164,7 +174,7 @@ class MinimapView @JvmOverloads constructor(
 		// different with Android Coordinate System (at left-top).
 		// Ref: Projectile motion with air resistance: https://en.wikipedia.org/wiki/Projectile_motion
 		// Consider initial velocity of bullet as some percent of the force which made by user.
-		val v = this.force * 0.85f
+		val v = this.force * 0.94f
 		val v0x = (v * cos(this.angle * PI / 180.0)).toFloat()
 		val v0y = (v * sin(this.angle * PI / 180.0)).toFloat()
 		// When wind == 0f, then ax must be 0f
@@ -182,7 +192,8 @@ class MinimapView @JvmOverloads constructor(
 		val miu = 0.042f
 		val g = 9.81f
 		val e = 2.71828f
-		while (nextX in -(width - this.playerX)..this.playerX && nextY in -(height - this.playerY)..(this.playerY)) {
+		var loopCount = max(width / 0.1f, height / 0.1f).toInt()
+		while (loopCount-- > 0 && (nextX in -(width - this.playerX)..this.playerX || nextY in -(height - this.playerY)..(this.playerY))) {
 			t += dt
 
 			val t2 = t * t
@@ -196,11 +207,15 @@ class MinimapView @JvmOverloads constructor(
 				this.measuredRulerWidth = curX
 			}
 
-			// Note: to draw with canvas, we must convert `player` position in PCS
-			// to Android View Coordinate System (at left-top of the view).
+			// Ti draw with canvas, we must convert position in Player Coordinate System (PCS, O at player position)
+			// to Android View Coordinate System (ACS, O at left-top of the view).
+			val directedCurX = if (this.isLeftShootDirection) curX else -curX
+			val directedCurY = curY
+			val directedNextX = if (this.isLeftShootDirection) nextX else -nextX
+			val directedNextY = nextY
 			canvas.drawLine(
-				this.playerX - curX, this.playerY - curY,
-				this.playerX - nextX, this.playerY - nextY, this.bulletPaint
+				this.playerX - directedCurX, this.playerY - directedCurY,
+				this.playerX - directedNextX, this.playerY - directedNextY, this.bulletPaint
 			)
 
 			curX = nextX
@@ -214,6 +229,8 @@ class MinimapView @JvmOverloads constructor(
 		// different with Android Coordinate System (at left-top).
 		// Ref: Projectile motion with air resistance: https://en.wikipedia.org/wiki/Projectile_motion
 		// Consider initial velocity of bullet as some percent of the force which made by user.
+		// ok tam cao: 0.91f
+		// goc 50 -> luc x 0.99f
 		val v = this.force * 0.91f
 		var vx = (v * cos(this.angle * PI / 180.0)).toFloat()
 		var vy = (v * sin(this.angle * PI / 180.0)).toFloat()
@@ -322,7 +339,8 @@ class MinimapView @JvmOverloads constructor(
 			}
 
 			override fun onMoveRightEdge(direction: Int, tickCount: Int) {
-				rulerBounds.right = DkMaths.clamp(rulerBounds.right + calcTranslation(direction, tickCount), 0f, width.toFloat())
+				rulerBounds.right =
+					DkMaths.clamp(rulerBounds.right + calcTranslation(direction, tickCount), 0f, width.toFloat())
 				invalidate()
 			}
 
