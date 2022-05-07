@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="utf-8"?>
+<compet.bundle.presentation.pages.main.ToolLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	xmlns:app="http://schemas.android.com/apk/res-auto"
+	android:id="@+id/toolLayout"
+	android:layout_width="match_parent"
+	android:layout_height="match_parent"
+	android:background="#80BB86FC"
+	android:clickable="false"
+	android:focusable="false">
+
+	<!-- Gameplay control layout -->
+	<androidx.constraintlayout.widget.ConstraintLayout
+		android:id="@+id/controlLayout"
+		android:layout_width="0dp"
+		android:layout_height="match_parent"
+		app:layout_constraintWidth_percent="0.75"
+		app:layout_constraintStart_toStartOf="parent"
+		app:layout_constraintTop_toTopOf="parent">
+
+		<FrameLayout
+			android:id="@+id/angleLayout"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			app:layout_constraintBottom_toTopOf="@id/forceLayout">
+
+			<SeekBar
+				android:id="@+id/angleBar"
+				android:layout_width="match_parent"
+				android:layout_height="match_parent" />
+
+			<TextView
+				android:id="@+id/tvAngleIndicator"
+				android:layout_width="wrap_content"
+				android:layout_height="match_parent"
+				android:background="@color/black"
+				android:gravity="center"
+				android:padding="2dp"
+				android:textColor="@color/white" />
+
+		</FrameLayout>
+
+		<FrameLayout
+			android:id="@+id/forceLayout"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			app:layout_constraintBottom_toTopOf="@id/windLayout"
+			app:layout_constraintStart_toStartOf="parent">
+
+			<SeekBar
+				android:id="@+id/forceBar"
+				android:layout_width="match_parent"
+				android:layout_height="match_parent" />
+
+			<TextView
+				android:id="@+id/tvForceIndicator"
+				android:layout_width="wrap_content"
+				android:layout_height="match_parent"
+				android:background="@color/black"
+				android:gravity="center"
+				android:padding="2dp"
+				android:textColor="@color/white" />
+
+		</FrameLayout>
+
+		<FrameLayout
+			android:id="@+id/windLayout"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			app:layout_constraintBottom_toBottomOf="parent"
+			app:layout_constraintStart_toStartOf="parent">
+
+			<SeekBar
+				android:id="@+id/windBar"
+				android:layout_width="match_parent"
+				android:layout_height="match_parent" />
+
+			<TextView
+				android:id="@+id/tvWindIndicator"
+				android:layout_width="wrap_content"
+				android:layout_height="match_parent"
+				android:background="@color/black"
+				android:gravity="center"
+				android:padding="2dp"
+				android:textColor="@color/white" />
+
+		</FrameLayout>
+
+		<androidx.appcompat.widget.SwitchCompat
+			android:id="@+id/firstSetupShower"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			app:layout_constraintStart_toStartOf="parent"
+			app:layout_constraintTop_toTopOf="parent"
+			android:checked="true"
+			android:text="FirstSetup"/>
+
+	</androidx.constraintlayout.widget.ConstraintLayout>
+
+	<!-- Setup player position and ruler bounds -->
+	<androidx.constraintlayout.widget.ConstraintLayout
+		android:id="@+id/firstSetupLayout"
+		android:layout_width="match_parent"
+		android:layout_height="match_parent">
+
+		<include
+			android:id="@+id/setupPlayerPositionLayout"
+			layout="@layout/view_joystick"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			app:layout_constraintBottom_toBottomOf="parent"
+			app:layout_constraintStart_toStartOf="parent"
+			app:layout_constraintTop_toTopOf="parent" />
+
+		<include
+			android:id="@+id/setupRulerBoundsLayout"
+			layout="@layout/view_joystick"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_marginStart="8dp"
+			app:layout_constraintBottom_toBottomOf="parent"
+			app:layout_constraintStart_toEndOf="@id/setupPlayerPositionLayout"
+			app:layout_constraintTop_toTopOf="parent" />
+
+		<Button
+			android:id="@+id/btnCancel"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_marginStart="8dp"
+			android:layout_marginBottom="4dp"
+			android:text="Cancel"
+			app:layout_constraintStart_toEndOf="@id/setupRulerBoundsLayout"
+			app:layout_constraintTop_toTopOf="parent" />
+
+		<Button
+			android:id="@+id/btnSave"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_marginStart="8dp"
+			android:layout_marginTop="4dp"
+			android:text="Save"
+			app:layout_constraintStart_toEndOf="@id/setupRulerBoundsLayout"
+			app:layout_constraintTop_toBottomOf="@id/btnCancel" />
+
+	</androidx.constraintlayout.widget.ConstraintLayout>
+
+	<!-- Minimap that is at front -->
+	<androidx.constraintlayout.widget.ConstraintLayout
+		android:layout_width="0dp"
+		android:layout_height="match_parent"
+		app:layout_constraintWidth_percent="0.25"
+		app:layout_constraintEnd_toEndOf="parent">
+
+		<compet.bundle.presentation.pages.main.MinimapView
+			android:id="@+id/minimapView"
+			android:layout_width="match_parent"
+			android:layout_height="match_parent" />
+
+		<androidx.appcompat.widget.SwitchCompat
+			android:id="@+id/shootDirectionSwitcher"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			app:layout_constraintEnd_toEndOf="parent"
+			app:layout_constraintTop_toTopOf="parent"
+			android:checked="true"
+			android:text="ShootDirection"/>
+
+	</androidx.constraintlayout.widget.ConstraintLayout>
+
+</compet.bundle.presentation.pages.main.ToolLayout>

@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<compet.bundle.presentation.pages.main.JoystickView
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	xmlns:app="http://schemas.android.com/apk/res-auto"
+	android:layout_width="match_parent"
+	android:layout_height="match_parent">
+
+	<TextView
+		android:id="@+id/vContent"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		app:layout_constraintBottom_toBottomOf="parent"
+		app:layout_constraintEnd_toEndOf="parent"
+		app:layout_constraintStart_toStartOf="parent"
+		app:layout_constraintTop_toTopOf="parent"
+		android:padding="16dp"
+		android:text="Player-Ruler"
+		android:textColor="@color/white"
+		android:textStyle="bold"
+		android:background="#80FF9914"/>
+
+	<TextView
+		android:id="@+id/vIconLeft"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		app:layout_constraintBottom_toBottomOf="parent"
+		app:layout_constraintEnd_toStartOf="@id/vContent"
+		app:layout_constraintTop_toTopOf="parent"
+		android:padding="8dp"
+		android:text="left"/>
+
+	<TextView
+		android:id="@+id/vIconTop"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		app:layout_constraintBottom_toTopOf="@id/vContent"
+		app:layout_constraintEnd_toEndOf="parent"
+		app:layout_constraintStart_toStartOf="parent"
+		android:padding="8dp"
+		android:text="top"/>
+
+	<TextView
+		android:id="@+id/vIconRight"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		app:layout_constraintBottom_toBottomOf="parent"
+		app:layout_constraintStart_toEndOf="@id/vContent"
+		app:layout_constraintTop_toTopOf="parent"
+		android:padding="8dp"
+		android:text="right"/>
+
+	<TextView
+		android:id="@+id/vIconBottom"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		app:layout_constraintEnd_toEndOf="parent"
+		app:layout_constraintStart_toStartOf="parent"
+		app:layout_constraintTop_toBottomOf="@id/vContent"
+		android:padding="8dp"
+		android:text="bottom"/>
+
+</compet.bundle.presentation.pages.main.JoystickView>
