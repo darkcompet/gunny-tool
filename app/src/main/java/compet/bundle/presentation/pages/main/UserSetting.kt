@@ -3,10 +3,14 @@ package compet.bundle.presentation.pages.main
 import com.google.gson.annotations.Expose
 import com.google.gson.annotations.SerializedName
 
-class MapSetting {
+class UserSetting {
 	companion object {
-		val pref_key = "map_setting"
+		const val prefKey = "user_setting"
 	}
+
+	@Expose
+	@SerializedName("force_percent")
+	var forcePercent = 0f
 
 	@Expose
 	@SerializedName("player_x")

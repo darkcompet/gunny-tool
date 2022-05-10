@@ -8,21 +8,18 @@ import android.content.pm.PackageManager
 import android.content.res.Resources
 import android.graphics.PixelFormat
 import android.os.Build
-import android.os.Debug
 import android.util.DisplayMetrics
 import android.util.Log
 import android.view.Gravity
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
 import androidx.core.app.ActivityCompat
 import compet.bundle.R
 
 @SuppressLint("InflateParams")
-class ToolPopupWindow(
+class MainWindow(
 	private val context: Context,
-	private val callback: Callback
 ) {
 	// Listener
 	interface Callback {
@@ -34,7 +31,7 @@ class ToolPopupWindow(
 		const val REQUEST_EXTERNAL_STORAGE = 1
 	}
 
-	private val layout: View
+	private val mainLayout: MainWindowLayout
 	private lateinit var layoutParams: WindowManager.LayoutParams
 	private val windowManager: WindowManager
 
@@ -57,13 +54,9 @@ class ToolPopupWindow(
 		}
 
 		// Inflating the view with the custom layout we created.
-		// Set onClickListener on the remove button, which removes the view from the window.
-//		this.layout = View.inflate(context, R.layout.tool_popup_window, null) as ToolPopupLayout
 		val layoutInflater = context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
-		this.layout = layoutInflater.inflate(R.layout.tool_popup_window, null) as ToolLayout
-		val layout = this.layout as ToolLayout
-//		layout.findViewById<View>(R.id.btnTakeScreenshot).setOnClickListener { this.callback.onClickTakeScreenshot() }
-//		layout.findViewById<View>(R.id.btnClosePopup).setOnClickListener { this.callback.onClickClosePopup() }
+		this.mainLayout = layoutInflater.inflate(R.layout.main_window, null) as MainWindowLayout
+		this.mainLayout.setup(this)
 
 		// Define the position of the window within the screen
 		this.layoutParams.gravity = Gravity.TOP or Gravity.END
@@ -73,8 +66,8 @@ class ToolPopupWindow(
 	fun open() {
 		try {
 			// Check if the view is already inflated or present in the window
-			if (this.layout.windowToken == null && this.layout.parent == null) {
-				this.windowManager.addView(this.layout, this.layoutParams)
+			if (this.mainLayout.windowToken == null && this.mainLayout.parent == null) {
+				this.windowManager.addView(this.mainLayout, this.layoutParams)
 			}
 		}
 		catch (e: Exception) {
@@ -85,11 +78,11 @@ class ToolPopupWindow(
 	fun close() {
 		try {
 			// Remove the view from the window
-			(this.context.getSystemService(Context.WINDOW_SERVICE) as WindowManager).removeView(layout)
+			(this.context.getSystemService(Context.WINDOW_SERVICE) as WindowManager).removeView(mainLayout)
 			// Invalidate the view
-			this.layout.invalidate()
+			this.mainLayout.invalidate()
 			// Remove all views
-			(this.layout.parent as ViewGroup).removeAllViews()
+			(this.mainLayout.parent as ViewGroup).removeAllViews()
 
 			// The above steps are necessary when you are adding and removing
 			// the view simultaneously, it might give some exceptions

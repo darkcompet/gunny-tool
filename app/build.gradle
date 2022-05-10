@@ -59,7 +59,8 @@ dependencies {
 
 	implementation project(path: ':android-module-core')
 	implementation project(path: ':android-module-json')
-	implementation project(path: ':android-module-storage')
+	implementation project(path: ':android-module-view')
+	implementation project(path: ':android-module-preference')
 
 	implementation 'androidx.constraintlayout:constraintlayout:2.1.3'
 }

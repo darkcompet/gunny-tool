@@ -34,10 +34,12 @@ Tool for Learning Gunny.
 	# At android modules
 	git submodule add https://github.com/darkcompet/android-module-core.git
 	git submodule add https://github.com/darkcompet/android-module-json.git
+	git submodule add https://github.com/darkcompet/android-module-preference.git
 
 	# Import modules by add below lines to `settings.gradle` file
 	include ':android-module-core'
 	include ':android-module-json'
+	include ':android-module-preference'
 
 	# And at `app/build.gradle`, declare modules which project needs, for eg:
 	implementation project(path: ':android-module-core')

@@ -5,15 +5,20 @@ import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
+import android.graphics.Rect
 import android.graphics.RectF
 import android.util.AttributeSet
 import android.view.View
-import android.widget.SeekBar
+import android.widget.TextView
 import compet.bundle.R
 import compet.bundle.common.AppPrefs
 import tool.compet.core.DkConfig
 import tool.compet.core.DkMaths
+import tool.compet.core.DkStrings
+import tool.compet.core.parseFloatDk
+import tool.compet.view.DkViews
 import kotlin.math.PI
+import kotlin.math.abs
 import kotlin.math.cos
 import kotlin.math.max
 import kotlin.math.pow
@@ -26,14 +31,8 @@ class MinimapView @JvmOverloads constructor(
 	defStyleAttr: Int = 0
 ) : View(context, attrs, defStyleAttr) {
 
+	lateinit var mainLayout: MainWindowLayout
 	private var isLeftShootDirection = true
-
-	// Assigned from outside
-	lateinit var angleBar: SeekBar
-	lateinit var forceBar: SeekBar
-	lateinit var windBar: SeekBar
-	lateinit var playerSetupPositionLayout: JoystickView
-	lateinit var rulerSetupBoundsLayout: JoystickView
 
 	// [-180, 180]
 	var angle = 0f
@@ -44,8 +43,7 @@ class MinimapView @JvmOverloads constructor(
 	// [-5.0, 5.0]
 	var wind = 0f
 
-	var issetPlayerPosition: Boolean = true
-	var issetEnemyPosition: Boolean = false
+	private var forcePercent = 0f
 
 	private val playerPaint: Paint
 	private var playerX: Float = 0f
@@ -63,7 +61,19 @@ class MinimapView @JvmOverloads constructor(
 	private val rulerPaint: Paint
 	private val rulerBounds = RectF()
 
+	private var shouldShowRulerDetail = false
+
 	init {
+		// Read/Apply user setting
+		if (AppPrefs.commonPref.contains(UserSetting.prefKey)) {
+			AppPrefs.commonPref.getJsonObject(UserSetting.prefKey, UserSetting::class.java)!!.also { setting ->
+				this.forcePercent = setting.forcePercent
+				this.playerX = setting.playerX
+				this.playerY = setting.playerY
+				this.rulerBounds.set(setting.rulerLeft, setting.rulerTop, setting.rulerRight, setting.rulerBottom)
+			}
+		}
+
 		this.paint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
 			this.color = Color.GREEN
 			this.style = Paint.Style.STROKE
@@ -78,13 +88,7 @@ class MinimapView @JvmOverloads constructor(
 		this.rulerPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
 			this.color = Color.YELLOW
 			this.style = Paint.Style.STROKE
-			this.strokeWidth = 0.5f
-		}
-
-		AppPrefs.commonPref().getJsonObject(MapSetting.pref_key, MapSetting::class.java)?.also { mapSetting ->
-			this.playerX = mapSetting.playerX
-			this.playerY = mapSetting.playerY
-			this.rulerBounds.set(mapSetting.rulerLeft, mapSetting.rulerTop, mapSetting.rulerRight, mapSetting.rulerBottom)
+			this.strokeWidth = 1f
 		}
 
 		this.playerPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
@@ -94,7 +98,7 @@ class MinimapView @JvmOverloads constructor(
 		}
 
 		this.bulletPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-			this.color = Color.YELLOW
+			this.color = Color.GREEN
 			this.style = Paint.Style.FILL_AND_STROKE
 			this.strokeWidth = 1f
 		}
@@ -117,6 +121,148 @@ class MinimapView @JvmOverloads constructor(
 		}
 	}
 
+	fun setup(mainLayout: MainWindowLayout) {
+		this.mainLayout = mainLayout
+		setupForcePercentModifier()
+		setupPlayerPositionLayout()
+		setupRulerBoundsLayout()
+	}
+
+	private fun setupForcePercentModifier() {
+		val joystickView = this.mainLayout.findViewById<JoystickView>(R.id.vForcePercent)
+		val vforcePercentContent = joystickView.findViewById<TextView>(R.id.vContent)
+		joystickView.findViewById<View>(R.id.vIconLeft).visibility = GONE
+		joystickView.findViewById<View>(R.id.vIconTop).visibility = GONE
+		joystickView.findViewById<View>(R.id.vIconRight).visibility = GONE
+		joystickView.findViewById<View>(R.id.vIconBottom).visibility = GONE
+
+		joystickView.callback = object : JoystickView.Callback {
+			override fun onFreeMove(direction: Int, tickCount: Int) {
+				when (direction) {
+					JoystickView.dir_left, JoystickView.dir_right -> {
+						val tmp = DkMaths.clamp(forcePercent + calcTranslation(direction, tickCount) / 100f, -10f, 10f)
+						val prefix = when {
+							tmp < 0f -> "-"
+							else -> " "
+						}
+						forcePercent = DkStrings.format("%1.2f", abs(tmp)).parseFloatDk()
+						vforcePercentContent.text = "Force *= $prefix$forcePercent"
+					}
+				}
+			}
+		}
+	}
+
+	private fun setupPlayerPositionLayout() {
+		val joystickView = this.mainLayout.findViewById<JoystickView>(R.id.setupPlayerPositionLayout)
+		joystickView.findViewById<View>(R.id.vIconLeft).visibility = GONE
+		joystickView.findViewById<View>(R.id.vIconTop).visibility = GONE
+		joystickView.findViewById<View>(R.id.vIconRight).visibility = GONE
+		joystickView.findViewById<View>(R.id.vIconBottom).visibility = GONE
+
+		joystickView.callback = object : JoystickView.Callback {
+			override fun onFreeMove(direction: Int, tickCount: Int) {
+				when (direction) {
+					JoystickView.dir_left, JoystickView.dir_right -> {
+						playerX = DkMaths.clamp(playerX + calcTranslation(direction, tickCount), 0f, width.toFloat())
+					}
+					JoystickView.dir_top, JoystickView.dir_bottom -> {
+						playerY = DkMaths.clamp(playerY + calcTranslation(direction, tickCount), 0f, height.toFloat())
+					}
+				}
+				invalidate()
+			}
+		}
+	}
+
+	private fun setupRulerBoundsLayout() {
+		val joystickView = this.mainLayout.findViewById<JoystickView>(R.id.setupRulerBoundsLayout)
+		joystickView.callback = object : JoystickView.Callback {
+			override fun onButtonClicked(index: Int, view: View) {
+				if (index == 0 || index == 2) {
+					joystickView.prioritizeHorizontal()
+				}
+				else if (index == 1 || index == 3) {
+					joystickView.prioritizeVertical()
+				}
+			}
+
+			override fun onMoveLeftEdge(direction: Int, tickCount: Int) {
+				rulerBounds.left = DkMaths.clamp(rulerBounds.left + calcTranslation(direction, tickCount), 0f, width.toFloat())
+				invalidate()
+			}
+
+			override fun onMoveTopEdge(direction: Int, tickCount: Int) {
+				rulerBounds.top = DkMaths.clamp(rulerBounds.top + calcTranslation(direction, tickCount), 0f, height.toFloat())
+				invalidate()
+			}
+
+			override fun onMoveRightEdge(direction: Int, tickCount: Int) {
+				rulerBounds.right =
+					DkMaths.clamp(rulerBounds.right + calcTranslation(direction, tickCount), 0f, width.toFloat())
+				invalidate()
+			}
+
+			override fun onMoveBottomEdge(direction: Int, tickCount: Int) {
+				rulerBounds.bottom =
+					DkMaths.clamp(rulerBounds.bottom + calcTranslation(direction, tickCount), 0f, height.toFloat())
+				invalidate()
+			}
+		}
+	}
+
+	private fun calcTranslation(direction: Int, tickCount: Int): Int {
+		when (direction) {
+			JoystickView.dir_left, JoystickView.dir_top -> {
+				return when {
+					tickCount == 5 || tickCount == 10 || tickCount == 15 || tickCount == 20 -> -1
+					tickCount > 40 -> -4
+					tickCount > 30 -> -3
+					tickCount > 20 -> -2
+					else -> 0
+				}
+			}
+			// Right, bottom
+			JoystickView.dir_right, JoystickView.dir_bottom -> {
+				return when {
+					tickCount == 5 || tickCount == 10 || tickCount == 15 || tickCount == 20 -> 1
+					tickCount > 40 -> 4
+					tickCount > 30 -> 3
+					tickCount > 20 -> 2
+					else -> 0
+				}
+			}
+			else -> {
+				throw Exception("Invalid direction: $direction")
+			}
+		}
+	}
+
+	fun onSaveSettings() {
+		AppPrefs.commonPref.edit()
+			.putJsonObject(UserSetting.prefKey, UserSetting().also { setting ->
+				setting.forcePercent = this.forcePercent
+				setting.playerX = this.playerX
+				setting.playerY = this.playerY
+				setting.rulerLeft = this.rulerBounds.left
+				setting.rulerTop = this.rulerBounds.top
+				setting.rulerRight = this.rulerBounds.right
+				setting.rulerBottom = this.rulerBounds.bottom
+			})
+			.commit()
+	}
+
+	fun changeShootDirection(leftShootDirection: Boolean) {
+		this.isLeftShootDirection = leftShootDirection
+		invalidate()
+	}
+
+	fun onSetupLayoutVisibilityChanged(visible: Boolean) {
+		this.shouldShowRulerDetail = !visible
+		invalidate()
+	}
+
+	private val tmpTextBounds = Rect()
 	override fun onDraw(canvas: Canvas) {
 		super.onDraw(canvas)
 
@@ -141,14 +287,29 @@ class MinimapView @JvmOverloads constructor(
 		val rulerUnitSize = this.rulerBounds.width() / 10
 		val rightCount = ((width - this.playerX) / rulerUnitSize).toInt()
 		val leftCount = (this.playerX / rulerUnitSize).toInt()
-		for (i in -rightCount..leftCount) {
-			if (i % 2 == 0) {
-				canvas.drawLine(
-					this.playerX - i * rulerUnitSize, 0f,
-					this.playerX - i * rulerUnitSize, height,
-					this.rulerPaint
-				)
-				canvas.drawText("$i", this.playerX - i * rulerUnitSize, height, this.textPaint)
+
+		for (pos in -rightCount..leftCount) {
+			if (pos % 2 == 0) {
+				if (this.shouldShowRulerDetail) {
+					canvas.drawLine(
+						this.playerX - pos * rulerUnitSize, 0f,
+						this.playerX - pos * rulerUnitSize, height,
+						this.rulerPaint
+					)
+				}
+
+				if (pos % 4 == 0) {
+					val text = "${abs(pos)}"
+
+					this.textPaint.getTextBounds(text, 0, text.length, tmpTextBounds)
+					val xy = DkViews.calcTextViewDrawPoint(
+						tmpTextBounds,
+						this.playerX - pos * rulerUnitSize,
+						height - tmpTextBounds.height()
+					)
+
+					canvas.drawText(text, xy[0], xy[1], this.textPaint)
+				}
 			}
 		}
 //		// Draw lines at Oy axis
@@ -229,9 +390,9 @@ class MinimapView @JvmOverloads constructor(
 		// different with Android Coordinate System (at left-top).
 		// Ref: Projectile motion with air resistance: https://en.wikipedia.org/wiki/Projectile_motion
 		// Consider initial velocity of bullet as some percent of the force which made by user.
-		// ok tam cao: 0.91f
-		// goc 50 -> luc x 0.99f
-		val v = this.force * 0.91f
+		// forcePercent's tam cao: x0.91f
+		// forcePercent's goc 50: x0.99f
+		val v = this.force * this.forcePercent
 		var vx = (v * cos(this.angle * PI / 180.0)).toFloat()
 		var vy = (v * sin(this.angle * PI / 180.0)).toFloat()
 		var t = 0f
@@ -279,108 +440,5 @@ class MinimapView @JvmOverloads constructor(
 			curX = nextX
 			curY = nextY
 		}
-	}
-
-	fun onSaveSetup() {
-		AppPrefs.commonPref().storeJsonObject(MapSetting.pref_key, MapSetting().also { mapSetting ->
-			mapSetting.playerX = this.playerX
-			mapSetting.playerY = this.playerY
-			mapSetting.rulerLeft = this.rulerBounds.left
-			mapSetting.rulerTop = this.rulerBounds.top
-			mapSetting.rulerRight = this.rulerBounds.right
-			mapSetting.rulerBottom = this.rulerBounds.bottom
-		})
-	}
-
-	fun setupPlayerPositionLayout(view: JoystickView) {
-		this.playerSetupPositionLayout = view
-
-		view.findViewById<View>(R.id.vIconLeft).visibility = GONE
-		view.findViewById<View>(R.id.vIconTop).visibility = GONE
-		view.findViewById<View>(R.id.vIconRight).visibility = GONE
-		view.findViewById<View>(R.id.vIconBottom).visibility = GONE
-
-		view.callback = object : JoystickView.Callback {
-			override fun onFreeMove(direction: Int, tickCount: Int) {
-				when (direction) {
-					JoystickView.dir_left, JoystickView.dir_right -> {
-						playerX = DkMaths.clamp(playerX + calcTranslation(direction, tickCount), 0f, width.toFloat())
-					}
-					JoystickView.dir_top, JoystickView.dir_bottom -> {
-						playerY = DkMaths.clamp(playerY + calcTranslation(direction, tickCount), 0f, height.toFloat())
-					}
-				}
-				invalidate()
-			}
-		}
-	}
-
-	fun setupRulerBoundsLayout(joystickView: JoystickView) {
-		this.rulerSetupBoundsLayout = joystickView
-
-		joystickView.callback = object : JoystickView.Callback {
-			override fun onButtonClicked(index: Int, view: View) {
-				if (index == 0 || index == 2) {
-					joystickView.prioritizeHorizontal()
-				}
-				else if (index == 1 || index == 3) {
-					joystickView.prioritizeVertical()
-				}
-			}
-
-			override fun onMoveLeftEdge(direction: Int, tickCount: Int) {
-				rulerBounds.left = DkMaths.clamp(rulerBounds.left + calcTranslation(direction, tickCount), 0f, width.toFloat())
-				invalidate()
-			}
-
-			override fun onMoveTopEdge(direction: Int, tickCount: Int) {
-				rulerBounds.top = DkMaths.clamp(rulerBounds.top + calcTranslation(direction, tickCount), 0f, height.toFloat())
-				invalidate()
-			}
-
-			override fun onMoveRightEdge(direction: Int, tickCount: Int) {
-				rulerBounds.right =
-					DkMaths.clamp(rulerBounds.right + calcTranslation(direction, tickCount), 0f, width.toFloat())
-				invalidate()
-			}
-
-			override fun onMoveBottomEdge(direction: Int, tickCount: Int) {
-				rulerBounds.bottom =
-					DkMaths.clamp(rulerBounds.bottom + calcTranslation(direction, tickCount), 0f, height.toFloat())
-				invalidate()
-			}
-		}
-	}
-
-	private fun calcTranslation(direction: Int, tickCount: Int): Int {
-		when (direction) {
-			JoystickView.dir_left, JoystickView.dir_top -> {
-				return when {
-					tickCount == 5 || tickCount == 10 || tickCount == 15 || tickCount == 20 -> -1
-					tickCount > 40 -> -4
-					tickCount > 30 -> -3
-					tickCount > 20 -> -2
-					else -> 0
-				}
-			}
-			// Right, bottom
-			JoystickView.dir_right, JoystickView.dir_bottom -> {
-				return when {
-					tickCount == 5 || tickCount == 10 || tickCount == 15 || tickCount == 20 -> 1
-					tickCount > 40 -> 4
-					tickCount > 30 -> 3
-					tickCount > 20 -> 2
-					else -> 0
-				}
-			}
-			else -> {
-				throw Exception("Invalid direction: $direction")
-			}
-		}
-	}
-
-	fun changeShootDirection(leftShootDirection: Boolean) {
-		this.isLeftShootDirection = leftShootDirection
-		invalidate()
 	}
 }

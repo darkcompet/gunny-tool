@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<compet.bundle.presentation.pages.main.ToolLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<compet.bundle.presentation.pages.main.MainWindowLayout xmlns:android="http://schemas.android.com/apk/res/android"
 	xmlns:app="http://schemas.android.com/apk/res-auto"
+	xmlns:tools="http://schemas.android.com/tools"
 	android:id="@+id/toolLayout"
 	android:layout_width="match_parent"
 	android:layout_height="match_parent"
@@ -8,14 +9,15 @@
 	android:clickable="false"
 	android:focusable="false">
 
-	<!-- Gameplay control layout -->
+	<!-- Control Layout -->
 	<androidx.constraintlayout.widget.ConstraintLayout
 		android:id="@+id/controlLayout"
 		android:layout_width="0dp"
 		android:layout_height="match_parent"
 		app:layout_constraintWidth_percent="0.75"
 		app:layout_constraintStart_toStartOf="parent"
-		app:layout_constraintTop_toTopOf="parent">
+		app:layout_constraintTop_toTopOf="parent"
+		app:layout_constraintBottom_toBottomOf="parent">
 
 		<FrameLayout
 			android:id="@+id/angleLayout"
@@ -86,21 +88,29 @@
 		</FrameLayout>
 
 		<androidx.appcompat.widget.SwitchCompat
-			android:id="@+id/firstSetupShower"
+			android:id="@+id/setupToggle"
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
 			app:layout_constraintStart_toStartOf="parent"
 			app:layout_constraintTop_toTopOf="parent"
+			android:paddingStart="8dp"
 			android:checked="true"
-			android:text="FirstSetup"/>
+			android:text="Setup"
+			android:textStyle="bold"
+			android:textColor="@color/white"
+			tools:ignore="RtlSymmetry" />
 
 	</androidx.constraintlayout.widget.ConstraintLayout>
 
-	<!-- Setup player position and ruler bounds -->
+	<!-- Setup Layout -->
 	<androidx.constraintlayout.widget.ConstraintLayout
-		android:id="@+id/firstSetupLayout"
-		android:layout_width="match_parent"
-		android:layout_height="match_parent">
+		android:id="@+id/setupLayout"
+		android:layout_width="0dp"
+		android:layout_height="match_parent"
+		app:layout_constraintWidth_percent="0.75"
+		app:layout_constraintStart_toStartOf="parent"
+		app:layout_constraintTop_toTopOf="parent"
+		app:layout_constraintBottom_toBottomOf="parent">
 
 		<include
 			android:id="@+id/setupPlayerPositionLayout"
@@ -109,42 +119,51 @@
 			android:layout_height="wrap_content"
 			app:layout_constraintBottom_toBottomOf="parent"
 			app:layout_constraintStart_toStartOf="parent"
-			app:layout_constraintTop_toTopOf="parent" />
+			app:layout_constraintTop_toTopOf="parent"
+			android:layout_marginStart="12dp"/>
 
 		<include
 			android:id="@+id/setupRulerBoundsLayout"
 			layout="@layout/view_joystick"
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
-			android:layout_marginStart="8dp"
+			android:layout_marginStart="16dp"
 			app:layout_constraintBottom_toBottomOf="parent"
 			app:layout_constraintStart_toEndOf="@id/setupPlayerPositionLayout"
 			app:layout_constraintTop_toTopOf="parent" />
 
-		<Button
-			android:id="@+id/btnCancel"
+		<include
+			layout="@layout/view_joystick"
+			android:id="@+id/vForcePercent"
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
-			android:layout_marginStart="8dp"
-			android:layout_marginBottom="4dp"
-			android:text="Cancel"
 			app:layout_constraintStart_toEndOf="@id/setupRulerBoundsLayout"
-			app:layout_constraintTop_toTopOf="parent" />
+			app:layout_constraintTop_toTopOf="parent"
+			app:layout_constraintBottom_toBottomOf="parent"
+			android:layout_marginStart="16dp"/>
 
-		<Button
+		<ImageView
 			android:id="@+id/btnSave"
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
-			android:layout_marginStart="8dp"
-			android:layout_marginTop="4dp"
-			android:text="Save"
-			app:layout_constraintStart_toEndOf="@id/setupRulerBoundsLayout"
-			app:layout_constraintTop_toBottomOf="@id/btnCancel" />
+			android:layout_marginEnd="8dp"
+			android:src="@drawable/ic_save"
+			app:layout_constraintEnd_toStartOf="@id/btnCancel"
+			app:layout_constraintBottom_toBottomOf="parent"/>
+
+		<ImageView
+			android:id="@+id/btnCancel"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:src="@drawable/ic_close"
+			app:layout_constraintEnd_toEndOf="parent"
+			app:layout_constraintBottom_toBottomOf="parent"/>
 
 	</androidx.constraintlayout.widget.ConstraintLayout>
 
 	<!-- Minimap that is at front -->
 	<androidx.constraintlayout.widget.ConstraintLayout
+		android:id="@+id/minimapLayout"
 		android:layout_width="0dp"
 		android:layout_height="match_parent"
 		app:layout_constraintWidth_percent="0.25"
@@ -162,8 +181,17 @@
 			app:layout_constraintEnd_toEndOf="parent"
 			app:layout_constraintTop_toTopOf="parent"
 			android:checked="true"
-			android:text="ShootDirection"/>
+			android:text="ShootDirection"
+			android:textColor="@color/white" />
 
 	</androidx.constraintlayout.widget.ConstraintLayout>
 
-</compet.bundle.presentation.pages.main.ToolLayout>
+	<ImageView
+		android:id="@+id/vClose"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		app:layout_constraintEnd_toStartOf="@id/minimapLayout"
+		app:layout_constraintTop_toTopOf="parent"
+		android:src="@drawable/ic_close"/>
+
+</compet.bundle.presentation.pages.main.MainWindowLayout>

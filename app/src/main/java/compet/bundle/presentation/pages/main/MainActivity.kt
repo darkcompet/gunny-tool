@@ -6,23 +6,29 @@ import android.media.projection.MediaProjectionManager
 import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
+import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import compet.bundle.R
+import kotlin.system.exitProcess
 
-class MainActivity : AppCompatActivity(), ToolPopupWindow.Callback {
+class MainActivity : AppCompatActivity(), MainWindow.Callback {
 	companion object {
 		private const val RC_TAKE_SCREENSHOT = 999
 	}
 
-	private lateinit var toolPopupWindow: ToolPopupWindow
+	private lateinit var mainWindow: MainWindow
 
 	override fun onCreate(savedInstanceState: Bundle?) {
 		super.onCreate(savedInstanceState)
 		setContentView(R.layout.activity_main)
 
+		findViewById<View>(R.id.btnOk).setOnClickListener {
+			finish()
+		}
+
 		if (hasOverlayPermission()) {
-			this.toolPopupWindow = ToolPopupWindow(this, this)
-			this.toolPopupWindow.open()
+			this.mainWindow = MainWindow(this)
+			this.mainWindow.open()
 		}
 		else {
 			requestOverlayPermission()
@@ -106,6 +112,6 @@ class MainActivity : AppCompatActivity(), ToolPopupWindow.Callback {
 	}
 
 	override fun onClickClosePopup() {
-		this.toolPopupWindow.close()
+		this.mainWindow.close()
 	}
 }

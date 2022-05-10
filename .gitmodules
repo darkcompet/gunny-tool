@@ -4,6 +4,9 @@
 [submodule "android-module-json"]
 	path = android-module-json
 	url = https://github.com/darkcompet/android-module-json.git
-[submodule "android-module-storage"]
-	path = android-module-storage
-	url = https://github.com/darkcompet/android-module-storage.git
+[submodule "android-module-preference"]
+	path = android-module-preference
+	url = https://github.com/darkcompet/android-module-preference.git
+[submodule "android-module-view"]
+	path = android-module-view
+	url = https://github.com/darkcompet/android-module-view.git

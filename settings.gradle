@@ -16,4 +16,5 @@ rootProject.name = "GunnyTool"
 include ':app'
 include ':android-module-core'
 include ':android-module-json'
-include ':android-module-storage'
+include ':android-module-view'
+include ':android-module-preference'

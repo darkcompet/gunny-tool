@@ -26,8 +26,11 @@
 		app:layout_constraintBottom_toBottomOf="parent"
 		app:layout_constraintEnd_toStartOf="@id/vContent"
 		app:layout_constraintTop_toTopOf="parent"
-		android:padding="8dp"
-		android:text="left"/>
+		android:background="@color/black"
+		android:padding="4dp"
+		android:gravity="center"
+		android:text="left"
+		android:textColor="@color/white"/>
 
 	<TextView
 		android:id="@+id/vIconTop"
@@ -36,8 +39,11 @@
 		app:layout_constraintBottom_toTopOf="@id/vContent"
 		app:layout_constraintEnd_toEndOf="parent"
 		app:layout_constraintStart_toStartOf="parent"
-		android:padding="8dp"
-		android:text="top"/>
+		android:background="@color/black"
+		android:padding="4dp"
+		android:gravity="center"
+		android:text="top"
+		android:textColor="@color/white"/>
 
 	<TextView
 		android:id="@+id/vIconRight"
@@ -46,8 +52,11 @@
 		app:layout_constraintBottom_toBottomOf="parent"
 		app:layout_constraintStart_toEndOf="@id/vContent"
 		app:layout_constraintTop_toTopOf="parent"
-		android:padding="8dp"
-		android:text="right"/>
+		android:background="@color/black"
+		android:padding="4dp"
+		android:gravity="center"
+		android:text="right"
+		android:textColor="@color/white"/>
 
 	<TextView
 		android:id="@+id/vIconBottom"
@@ -56,7 +65,10 @@
 		app:layout_constraintEnd_toEndOf="parent"
 		app:layout_constraintStart_toStartOf="parent"
 		app:layout_constraintTop_toBottomOf="@id/vContent"
-		android:padding="8dp"
-		android:text="bottom"/>
+		android:background="@color/black"
+		android:padding="4dp"
+		android:gravity="center"
+		android:text="bottom"
+		android:textColor="@color/white"/>
 
 </compet.bundle.presentation.pages.main.JoystickView>

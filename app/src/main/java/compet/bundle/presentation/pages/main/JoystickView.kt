@@ -72,7 +72,7 @@ class JoystickView @JvmOverloads constructor(
 			icons[index].setOnClickListener {
 				// Unselect all icons
 				for (tmp in icons) {
-					tmp.setBackgroundColor(Color.WHITE)
+					tmp.setBackgroundColor(Color.BLACK)
 				}
 
 				// Unselect this icon
