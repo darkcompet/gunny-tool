@@ -1,10 +1,10 @@
 package compet.bundle.common
 
 import compet.bundle.App
-import tool.compet.preference.DkSharedPreference
+import tool.compet.preference.DkPreference
 
 class AppPrefs {
 	companion object {
-		val commonPref = DkSharedPreference(App.context, "pref_common")
+		val commonPref = DkPreference(App.context, "pref_common")
 	}
 }

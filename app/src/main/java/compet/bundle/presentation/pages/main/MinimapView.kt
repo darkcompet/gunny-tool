@@ -249,7 +249,7 @@ class MinimapView @JvmOverloads constructor(
 				setting.rulerRight = this.rulerBounds.right
 				setting.rulerBottom = this.rulerBounds.bottom
 			})
-			.commit()
+			.commitNow()
 	}
 
 	fun changeShootDirection(leftShootDirection: Boolean) {

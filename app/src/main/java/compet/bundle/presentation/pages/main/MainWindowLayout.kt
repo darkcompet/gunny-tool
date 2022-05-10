@@ -86,6 +86,14 @@ class MainWindowLayout @JvmOverloads constructor(
 				this.minimapView.onSetupLayoutVisibilityChanged(false)
 			}
 		}
+		if (!AppPrefs.commonPref.contains(UserSetting.prefKey)) {
+			// Run at next frame to show setup layout.
+			// Note that, to ensure toggle is checked, we should turn off it before turn on.
+			post {
+				setupToggle.isChecked = false
+				setupToggle.isChecked = true
+			}
+		}
 
 		// [Direction switcher]
 		val shootDirectionSwitcher = findViewById<SwitchCompat>(R.id.shootDirectionSwitcher)
@@ -96,7 +104,8 @@ class MainWindowLayout @JvmOverloads constructor(
 		// [Setup layout]
 		if (AppPrefs.commonPref.contains(UserSetting.prefKey)) {
 			val setting = AppPrefs.commonPref.getJsonObject(UserSetting.prefKey, UserSetting::class.java)!!
-			findViewById<JoystickView>(R.id.vForcePercent).findViewById<TextView>(R.id.vContent).text = "Force *= ${setting.forcePercent}"
+			findViewById<JoystickView>(R.id.vForcePercent).findViewById<TextView>(R.id.vContent).text =
+				"Force *= ${setting.forcePercent}"
 
 			if (setupToggle.isChecked) {
 				setupToggle.performClick()
