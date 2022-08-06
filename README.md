@@ -8,3 +8,5 @@ Tool for Learning Gunny.
 -S to sign commit
 
 -- after ok
+
+--- add profile
